@@ -31,6 +31,7 @@ ui <- fluidPage(
   titlePanel("BF 591 Final Project"),
   tabsetPanel(
     type = "tabs",
+    # first main tab
     tabPanel("Sample Information Exploration",
              p("This tab is about exploring the sample information on uploading a metadata file"),
              sidebarLayout(
@@ -39,6 +40,7 @@ ui <- fluidPage(
                  submitButton("Submit"), width = 3
                ),
                mainPanel(
+               # subtabs for first main tab
                  tabsetPanel(
                    type = "tabs",
                    tabPanel("Summary", p("This tab provides the statstics summary of sample information.") , tableOutput("summary_table")),
@@ -59,6 +61,7 @@ ui <- fluidPage(
                )
              )
     ),
+    # second main tab
     tabPanel("Counts Matrix Exploration",
              p("This tab is about exploring the data on uploading a normalized counts matrix"),
              sidebarLayout(
@@ -69,6 +72,7 @@ ui <- fluidPage(
                  submitButton("Submit"), width = 3
                ),
                mainPanel(
+               # subtabs for second main tab
                  tabsetPanel(
                    type = "tabs",
                    tabPanel("Table or Text",
@@ -96,6 +100,7 @@ ui <- fluidPage(
                  )
                )
              )),
+    # third main tab
     tabPanel("Differential Expression",
              p("This tab is about exploring the results of differential expression on uploading a differential expression analysis results."),
              sidebarLayout(
@@ -104,6 +109,7 @@ ui <- fluidPage(
                  submitButton(text = 'Submit'), width = 3
                ),
                mainPanel(
+               # subtabs for third main tab
                  tabsetPanel(
                    type = "tabs",
                    tabPanel("Table",
@@ -130,6 +136,7 @@ ui <- fluidPage(
                )
              )
     ),
+    #fourth main tab
     tabPanel("Visualization of Individual Gene Expression",
              p("This tab is to visualize data about each gene individually."),
              sidebarLayout(
@@ -367,8 +374,8 @@ server <- function(input, output,session) {
   #'@param counts_tib This is the counts matrix that the user will input
   #'@param perc_var This is the input from the variance slider 
   #'@param nz_genes This is the input from the zero genes slider 
-  #'@param num_colors 
-  #'@param palette 
+ 
+  
   plot_heatmap <- function(counts_tib, perc_var, nz_genes){
     if (!is.null(input$Normalized_counts_matrix)){
       counts_tib <- na_if(counts_tib, 0)
@@ -389,6 +396,9 @@ server <- function(input, output,session) {
   #'@details Here we will construct a PC1 vs PC2 plot based on the input sequence 
   #'that the user will utilize 
   #'@param data The counts matrix that the user will input 
+  #'@param var_slider slider to select padj value
+  #'@param comp1 selected principal component as x-axis for plot
+  #'@param comp2 selected principal component as y-axis for plot
   pca <- function(counts_tib, var_slider, comp1, comp2){
     if (!is.null(input$Normalized_counts_matrix)){
       #make plot tib-
@@ -494,8 +504,8 @@ server <- function(input, output,session) {
   #' @param dataf The loaded data frame.
   #' @param x_name The column name to plot on the x-axis
   #' @param y_name The column name to plot on the y-axis
-  #' @param de_base One of the colors for the points.
-  #' @param de_highlight The other colors for the points. Hexadecimal strings: "#CDC4B5"
+  #' @param color1 One of the colors for the points.
+  #' @param color2 The other colors for the points. Hexadecimal strings: "#CDC4B5"
   #'
   #' @return A ggplot object of a volcano plot
   volcano_plot <-
@@ -541,6 +551,9 @@ server <- function(input, output,session) {
   # ----------------------------------------------------------------------------------------------------------------------------
   
   # Tab - 4:
+  
+  #' @details Here all we want to do is simply load in the count .csv file that the user will 
+  #' input via the "Submit" button.
   load_IGE_counts <- reactive({
     if (!is.null(input$IGE_countsID)){
       counts <- read_csv(input$IGE_countsID$datapath)
@@ -549,6 +562,9 @@ server <- function(input, output,session) {
     else{return(NULL)}
   })
   
+  
+  #' @details Here all we want to do is simply load in the sample/metadata .csv file that the user will 
+  #' input via the "Submit" button.
   IGE_meta <- reactive({
     if (!is.null(input$IGE_metaID)){
       meta <- read_csv(input$IGE_metaID$datapath)
@@ -557,6 +573,12 @@ server <- function(input, output,session) {
   })
   
   # Create the plot
+  #'@details Here we want to produce different plots depenidng upon users input 
+  #'@param counts_tib This is the counts matrix that the user will input
+  #'@param meta_tib This is the metadata matrix that user will input 
+  #'@param meta_cat This is for choosing categorical variable 
+  #'@param selectgene This gives the user the option to input individual gene 
+  #'@param type_plot This is for selecting plot type 
   plot_distro <- function(counts_tib, meta_tib, meta_cat, selectgene,type_plot){
     if (!is.null(input$IGE_metaID) & !is.null(input$IGE_countsID)){
       counts_tib <- column_to_rownames(counts_tib, var = "gene")
